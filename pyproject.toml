@@ -1,0 +1,15 @@
+[project]
+name = "Programmieruebung2_Abschlussprojekt"
+version = "0.1.0"
+description = "Default template for PDM package"
+authors = [
+    {name = "Olivia Kiechl", email = "ko8973@mci4me.at"},
+]
+dependencies = ["pandas>=2.3.0", "streamlit>=1.45.1", "matplotlib>=3.10.3", "plotly>=6.1.2", "numpy>=2.3.0", "scipy>=1.15.3"]
+requires-python = "==3.12.*"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = false
