@@ -2,6 +2,8 @@ import streamlit as st
 from PIL import Image
 from person import Person
 from ekgdata import EKGdata
+from mulitpage import MultiPage
+from login import login 
 
 # App-Konfiguration
 st.set_page_config(page_title="EKG Analyse", layout="wide")
