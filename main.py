@@ -3,6 +3,8 @@ import login
 from PIL import Image
 from person import Person
 from ekgdata import EKGdata
+from upload import handle_upload
+
 
 # Seitenlayout konfigurieren
 st.set_page_config(page_title="EKG Analyse", layout="wide")
@@ -16,7 +18,7 @@ if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
 st.title("EKG APP")
 
 # Sidebar Navigation
-seiten = ["Personendaten", "EKG-Auswertung"]
+seiten = ["Personendaten", "EKG-Auswertung", "Eigene EKG-Datei hochladen"]
 seite = st.sidebar.radio("Navigation", seiten)
 
 # Session-State initialisieren
@@ -100,5 +102,37 @@ elif seite == "EKG-Auswertung":
     else:
         st.info("Bitte zuerst eine Person auf der Seite 'Personendaten' auswählen.")
 
+elif seite == "Eigene EKG-Daten hochladen":
+    st.header("Eigene EKG-Daten hochladen")
 
+    uploaded_file = st.file_uploader("Lade eine EKG-Datei im TXT-Format hoch", type=["txt"])
 
+    if uploaded_file is not None:
+        try:
+            df = pd.read_csv(uploaded_file, sep="\t", header=None, names=["Messwerte in mV", "Zeit in ms"])
+            st.success("Datei erfolgreich geladen!")
+
+            # Erste Vorschau
+            st.subheader("Vorschau der EKG-Daten")
+            st.write(df.head())
+
+            # Analyse starten
+            from ekgdata import EKGdata
+            dummy_test = {
+                "id": "custom",
+                "date": "heute",
+                "result_link": uploaded_file
+            }
+            ekg = EKGdata(dummy_test)
+            ekg.df = df  # Datei wurde manuell gelesen
+            ekg.find_peaks()
+
+            st.write(f"Berechnete Herzfrequenz: {ekg.estimate_hr()} bpm")
+            st.write(f"Minimale Herzfrequenz: {ekg.get_min_hr()} bpm")
+            st.write(f"Maximale Herzfrequenz: {ekg.get_max_hr()} bpm")
+            st.write(f"Dauer der Aufnahme: {ekg.get_signal_duration_min()} Minuten")
+
+            st.plotly_chart(ekg.plot_time_series(), use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Fehler beim Verarbeiten der Datei: {e}")
