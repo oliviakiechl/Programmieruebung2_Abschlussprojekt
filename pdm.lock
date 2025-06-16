@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:75ddbd0eb372b8708aa270510d8960cd390dc6ebea03346b49025393794a930c"
+content_hash = "sha256:8a3270a78060ba6300ce8cc6cf797640ada49be1e584d61a6f7a2759a6da03d6"
 
 [[metadata.targets]]
 requires_python = "==3.12.*"
@@ -48,6 +48,20 @@ groups = ["default"]
 files = [
     {file = "blinker-1.9.0-py3-none-any.whl", hash = "sha256:ba0efaa9080b619ff2f3459d1d500c57bddea4a6b424b60a91141db6fd2f08bc"},
     {file = "blinker-1.9.0.tar.gz", hash = "sha256:b4ce2265a7abece45e7cc896e98dbebe6cead56bcf805a3d23136d145f5445bf"},
+]
+
+[[package]]
+name = "branca"
+version = "0.8.1"
+requires_python = ">=3.7"
+summary = "Generate complex HTML+JS pages with Python"
+groups = ["default"]
+dependencies = [
+    "jinja2>=3",
+]
+files = [
+    {file = "branca-0.8.1-py3-none-any.whl", hash = "sha256:d29c5fab31f7c21a92e34bf3f854234e29fecdcf5d2df306b616f20d816be425"},
+    {file = "branca-0.8.1.tar.gz", hash = "sha256:ac397c2d79bd13af0d04193b26d5ed17031d27609a7f1fab50c438b8ae712390"},
 ]
 
 [[package]]
@@ -154,6 +168,24 @@ groups = ["default"]
 files = [
     {file = "cycler-0.12.1-py3-none-any.whl", hash = "sha256:85cef7cff222d8644161529808465972e51340599459b8ac3ccbac5a854e0d30"},
     {file = "cycler-0.12.1.tar.gz", hash = "sha256:88bb128f02ba341da8ef447245a9e138fae777f6a23943da4540077d3601eb1c"},
+]
+
+[[package]]
+name = "folium"
+version = "0.19.7"
+requires_python = ">=3.9"
+summary = "Make beautiful maps with Leaflet.js & Python"
+groups = ["default"]
+dependencies = [
+    "branca>=0.6.0",
+    "jinja2>=2.9",
+    "numpy",
+    "requests",
+    "xyzservices",
+]
+files = [
+    {file = "folium-0.19.7-py2.py3-none-any.whl", hash = "sha256:4f60efffd0a97fc22d94cba75cfa0bf954a87b828d7f2b878059e55d38c51c40"},
+    {file = "folium-0.19.7.tar.gz", hash = "sha256:cf256a1e38441e7a8e01977bceeba34f86fd68745d7d7e490ccbecc79dc0d388"},
 ]
 
 [[package]]
@@ -625,6 +657,20 @@ files = [
 ]
 
 [[package]]
+name = "st-pages"
+version = "1.0.1"
+requires_python = "!=2.7.*,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*,!=3.6.*,!=3.7.*,!=3.8.*,>=3.9"
+summary = "An experimental version of Streamlit Multi-Page Apps"
+groups = ["default"]
+dependencies = [
+    "streamlit>=1.36.0",
+]
+files = [
+    {file = "st_pages-1.0.1-py3-none-any.whl", hash = "sha256:9098fb4d96bc1dfa56cc2c56ef6fe44e607c69261ff4bceee1f6e9c1e0c2acb4"},
+    {file = "st_pages-1.0.1.tar.gz", hash = "sha256:2641cfbff1c768ff146858ed742d282b30a3a4c3e4f7717898705bbaee717736"},
+]
+
+[[package]]
 name = "streamlit"
 version = "1.45.1"
 requires_python = "!=3.9.7,>=3.9"
@@ -653,6 +699,52 @@ dependencies = [
 files = [
     {file = "streamlit-1.45.1-py3-none-any.whl", hash = "sha256:9ab6951585e9444672dd650850f81767b01bba5d87c8dac9bc2e1c859d6cc254"},
     {file = "streamlit-1.45.1.tar.gz", hash = "sha256:e37d56c0af5240dbc240976880e81366689c290a559376417246f9b3f51b4217"},
+]
+
+[[package]]
+name = "streamlit-folium"
+version = "0.25.0"
+requires_python = ">=3.9"
+summary = "Render Folium objects in Streamlit"
+groups = ["default"]
+dependencies = [
+    "branca",
+    "folium!=0.15.0,>=0.13",
+    "jinja2",
+    "streamlit>=1.35.0",
+]
+files = [
+    {file = "streamlit_folium-0.25.0-py3-none-any.whl", hash = "sha256:48d5f05ea3e9005c00c0b2fe5a9a3086df30d04e1a20c3630a6c9df183ec590a"},
+    {file = "streamlit_folium-0.25.0.tar.gz", hash = "sha256:f32eb51c1958705030e15045a38edaf9c046d6de5e6587e64190251466a4a006"},
+]
+
+[[package]]
+name = "streamlit-space"
+version = "0.1.5"
+requires_python = ">=3.7, !=2.7.*, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*"
+summary = "Spacing component for Streamlit"
+groups = ["default"]
+dependencies = [
+    "streamlit<2.0.0,>=1.14.0",
+]
+files = [
+    {file = "streamlit_space-0.1.5-py3-none-any.whl", hash = "sha256:50084816cd3682049e9f540dfdc58935711552bc387ae7c656f36d5271d958d3"},
+    {file = "streamlit_space-0.1.5.tar.gz", hash = "sha256:3fbeb5eafb3e93c679e2cd3bb1fcc975377016717f799852f632f818db79364a"},
+]
+
+[[package]]
+name = "streamlit-toggle"
+version = "0.1.3"
+requires_python = ">=3.7, !=2.7.*, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*"
+summary = "Toggling component for Streamlit"
+groups = ["default"]
+dependencies = [
+    "streamlit-space<0.2.0,>=0.1.5",
+    "streamlit<2.0.0,>=1.14.0",
+]
+files = [
+    {file = "streamlit_toggle-0.1.3-py3-none-any.whl", hash = "sha256:cb2f36d9f6d8cb20a30d4ed3e10827daeea0270826eeebea1c078b3448550a76"},
+    {file = "streamlit_toggle-0.1.3.tar.gz", hash = "sha256:0d2f5dd0283e0d02ba611f943c8cfb650ed3338df7d43d6476e13f2b76147584"},
 ]
 
 [[package]]
@@ -753,4 +845,15 @@ files = [
     {file = "watchdog-6.0.0-py3-none-win_amd64.whl", hash = "sha256:cbafb470cf848d93b5d013e2ecb245d4aa1c8fd0504e863ccefa32445359d680"},
     {file = "watchdog-6.0.0-py3-none-win_ia64.whl", hash = "sha256:a1914259fa9e1454315171103c6a30961236f508b9b623eae470268bbcc6a22f"},
     {file = "watchdog-6.0.0.tar.gz", hash = "sha256:9ddf7c82fda3ae8e24decda1338ede66e1c99883db93711d8fb941eaa2d8c282"},
+]
+
+[[package]]
+name = "xyzservices"
+version = "2025.4.0"
+requires_python = ">=3.8"
+summary = "Source of XYZ tiles providers"
+groups = ["default"]
+files = [
+    {file = "xyzservices-2025.4.0-py3-none-any.whl", hash = "sha256:8d4db9a59213ccb4ce1cf70210584f30b10795bff47627cdfb862b39ff6e10c9"},
+    {file = "xyzservices-2025.4.0.tar.gz", hash = "sha256:6fe764713648fac53450fbc61a3c366cb6ae5335a1b2ae0c3796b495de3709d8"},
 ]
