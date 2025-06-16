@@ -87,7 +87,12 @@ elif seite == "EKG-Auswertung":
 
                 st.write(f"Datum des Tests: {ekg.date}")
                 st.write(f"Berechnete Herzfrequenz: {hr} bpm")
+                st.write(f"Minimale Herzfrequenz: {ekg.get_min_hr()} bpm")
+                st.write(f"Maximale Herzfrequenz: {ekg.get_max_hr()} bpm")
+                st.write(f"Dauer der Aufnahme: {ekg.get_signal_duration_min()} Minuten")
+                
                 st.plotly_chart(ekg.plot_time_series(), use_container_width=True)
+                
             else:
                 st.warning("Der ausgewählte EKG-Test konnte nicht geladen werden.")
         else:

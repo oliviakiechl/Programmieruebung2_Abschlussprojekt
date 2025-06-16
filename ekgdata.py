@@ -1,3 +1,4 @@
+
 import json
 import pandas as pd
 import plotly.express as px
@@ -43,6 +44,28 @@ class EKGdata:
         self.hr = 60000 / mean_rr if mean_rr > 0 else 0
         return round(self.hr, 1)
 
+    def get_min_hr(self):
+        if self.peaks is None:
+            self.find_peaks()
+        times_ms = self.df["Zeit in ms"].iloc[self.peaks].values
+        rr_intervals_ms = np.diff(times_ms)
+        hr_values = 60000 / rr_intervals_ms
+        return int(np.min(hr_values)) if len(hr_values) > 0 else 0
+
+    def get_max_hr(self):
+        if self.peaks is None:
+            self.find_peaks()
+        times_ms = self.df["Zeit in ms"].iloc[self.peaks].values
+        rr_intervals_ms = np.diff(times_ms)
+        hr_values = 60000 / rr_intervals_ms
+        return int(np.max(hr_values)) if len(hr_values) > 0 else 0
+
+    def get_signal_duration_min(self):
+        if not self.df.empty:
+            duration_ms = self.df["Zeit in ms"].iloc[-1] - self.df["Zeit in ms"].iloc[0]
+            return round(duration_ms / 60000, 2)
+        return 0
+
     def plot_time_series(self):
         df = self.df.copy()
 
@@ -61,7 +84,7 @@ class EKGdata:
             peak_times_ms = self.df["Zeit in ms"].iloc[self.peaks].values - start_time
             peaks_in_range = self.peaks[peak_times_ms <= 10000]
 
-            df_peaks = df.iloc[peaks_in_range]
+            df_peaks = df.iloc[peaks_in_range].copy()
             df_peaks["Zeit in s"] = df_peaks["Zeit in ms"] / 1000
 
             fig.add_scatter(
@@ -76,14 +99,15 @@ class EKGdata:
         return fig
 
 
-
-
 if __name__ == "__main__":
     ekg = EKGdata.load_by_id(1)
     if ekg:
         ekg.find_peaks()
         hr = ekg.estimate_hr()
         print(f"Herzfrequenz: {hr} bpm")
+        print(f"Minimale Herzfrequenz: {ekg.get_min_hr()} bpm")
+        print(f"Maximale Herzfrequenz: {ekg.get_max_hr()} bpm")
+        print(f"Dauer der Aufnahme: {ekg.get_signal_duration_min()} Minuten")
         fig = ekg.plot_time_series()
         fig.show()
     else:
