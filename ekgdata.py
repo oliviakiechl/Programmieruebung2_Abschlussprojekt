@@ -79,26 +79,32 @@ class EKGdata:
         df["Zeit in ms"] = df["Zeit in ms"] - start_time
         df["Zeit in s"] = df["Zeit in ms"] / 1000
 
-        # Zeitbereich filtern, wenn angegeben
+    # Zeitbereich filtern, wenn angegeben
         if time_range is not None:
             start_sec, end_sec = time_range
             df = df[(df["Zeit in s"] >= start_sec) & (df["Zeit in s"] <= end_sec)]
-        # Wenn kein Zeitbereich, dann gesamte Daten anzeigen (ohne Filter)
 
         fig = px.line(df, x="Zeit in s", y="Messwerte in mV", title="EKG Zeitreihe")
 
+    # Peaks berechnen für den gesamten Datensatz (relativ zur Zeit in Sekunden)
         if self.peaks is not None:
-            peak_times_sec = (self.df["Zeit in ms"].iloc[self.peaks].values - start_time) / 1000
-            if time_range is not None:
-                # Peaks nur im angezeigten Bereich markieren
-                peaks_in_range_idx = [i for i, t in enumerate(peak_times_sec) if start_sec <= t <= end_sec]
-            else:
-                peaks_in_range_idx = list(range(len(self.peaks)))
+        # Ursprüngliche Zeitreihe berechnen (absolut)
+            peak_times_ms = self.df["Zeit in ms"].iloc[self.peaks].values
+            peak_times_sec = (peak_times_ms - start_time) / 1000
+            peak_values = self.df["Messwerte in mV"].iloc[self.peaks].values
 
-            df_peaks = df.iloc[peaks_in_range_idx]
+            peaks_df = pd.DataFrame({
+                "Zeit in s": peak_times_sec,
+                "Messwerte in mV": peak_values
+            })
+
+        # Optional: auf Zeitbereich beschränken
+            if time_range is not None:
+                peaks_df = peaks_df[(peaks_df["Zeit in s"] >= start_sec) & (peaks_df["Zeit in s"] <= end_sec)]
+
             fig.add_scatter(
-                x=df_peaks["Zeit in s"],
-                y=df_peaks["Messwerte in mV"],
+                x=peaks_df["Zeit in s"],
+                y=peaks_df["Messwerte in mV"],
                 mode='markers',
                 marker=dict(color='red', size=6),
                 name="Peaks"
@@ -106,6 +112,7 @@ class EKGdata:
 
         fig.update_layout(xaxis_title="Zeit (s)", yaxis_title="Messwerte in mV")
         return fig
+
 
 
 if __name__ == "__main__":
