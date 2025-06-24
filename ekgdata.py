@@ -113,6 +113,39 @@ class EKGdata:
         fig.update_layout(xaxis_title="Zeit (s)", yaxis_title="Messwerte in mV")
         return fig
 
+    def check_for_anomalies(self):
+        """Gibt Warnungen zurück, falls auffällige Werte erkannt werden."""
+        if self.peaks is None:
+            self.find_peaks()
+
+        anomalies = []
+
+        avg_hr = self.estimate_hr()
+        min_hr = self.get_min_hr()
+        max_hr = self.get_max_hr()
+
+        # 1. Durchschnitt zu hoch oder zu niedrig
+        if avg_hr > 100:
+            anomalies.append("⚠️ Verdacht auf Tachykardie (durchschnittliche HR > 100 bpm)")
+        elif avg_hr < 50:
+            anomalies.append("⚠️ Verdacht auf Bradykardie (durchschnittliche HR < 50 bpm)")
+
+        # 2. Extremwerte außerhalb normaler Bandbreite
+        if max_hr > 160:
+            anomalies.append("⚠️ Sehr hohe Spitzen-Herzfrequenz (> 160 bpm)")
+        if min_hr < 40:
+            anomalies.append("⚠️ Sehr niedrige minimale Herzfrequenz (< 40 bpm)")
+
+        # 3. Unregelmäßige RR-Intervalle
+        times_ms = self.df["Zeit in ms"].iloc[self.peaks].values
+        rr_intervals = np.diff(times_ms)
+        if len(rr_intervals) > 1:
+            std_rr = np.std(rr_intervals)
+            if std_rr > 100:
+                anomalies.append("⚠️ Unregelmäßiger Herzrhythmus (hohe Schwankung in RR-Intervallen)")
+
+        return anomalies
+
 
 
 if __name__ == "__main__":
@@ -125,4 +158,3 @@ if __name__ == "__main__":
         fig.show()
     else:
         print("EKG-Test mit dieser ID nicht gefunden.")
-
