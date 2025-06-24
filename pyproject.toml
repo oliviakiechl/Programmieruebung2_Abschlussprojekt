@@ -5,7 +5,7 @@ description = "Default template for PDM package"
 authors = [
     {name = "Olivia Kiechl", email = "ko8973@mci4me.at"},
 ]
-dependencies = ["pandas>=2.3.0", "streamlit>=1.45.1", "matplotlib>=3.10.3", "plotly>=6.1.2", "numpy>=2.3.0", "scipy>=1.16.0", "streamlit-folium>=0.25.0", "st-pages>=1.0.1", "streamlit-toggle>=0.1.3", "reportlab>=4.4.2", "kaleido>=1.0.0"]
+dependencies = ["pandas>=2.3.0", "streamlit>=1.45.1", "matplotlib>=3.10.3", "plotly>=6.1.2", "numpy>=2.3.0", "scipy>=1.16.0", "streamlit-folium>=0.25.0", "st-pages>=1.0.1", "streamlit-toggle>=0.1.3", "reportlab>=4.4.2", "kaleido>=1.0.0", "datetime>=5.5"]
 requires-python = "==3.12.*"
 readme = "README.md"
 license = {text = "MIT"}
