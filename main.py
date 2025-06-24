@@ -347,3 +347,9 @@ elif seite == "PDF-Bericht erstellen":
                         file_name="ekg_bericht.pdf",
                         mime="application/pdf"
                     )
+
+elif seite == "Logout":
+    st.session_state.clear()
+    st.success("Du wurdest erfolgreich ausgeloggt.")
+    st.stop()
+    
