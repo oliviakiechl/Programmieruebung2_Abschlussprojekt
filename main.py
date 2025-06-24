@@ -11,6 +11,7 @@ from pdf_export import export_pdf
 # Seitenlayout konfigurieren
 st.set_page_config(page_title="EKG Analyse", layout="wide")
 
+
 # --- Login ---
 if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
     login()
@@ -20,10 +21,11 @@ if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
 st.title("EKG APP")
 
 # Sidebar Navigation
-seiten = ["Personendaten", "EKG-Auswertung", "Herzfrequenz-Verlauf", "Eigene EKG-Datei hochladen", "PDF-Bericht erstellen"]
-if st.session_state["role"] == "arzt":
-    seiten.append("Neue Person anlegen")
+
+# --- Unternavigation für "Neue:r Patient:in"
+seiten = ["Personendaten", "EKG-Auswertung", "Herzfrequenz-Verlauf", "Eigene EKG-Datei hochladen", "PDF-Bericht erstellen","Neue Person anlegen", "Logout"]
 seite = st.sidebar.radio("Navigation", seiten)
+
 # Session-State initialisieren
 if 'current_user_name' not in st.session_state:
     st.session_state.current_user_name = 'None'
@@ -67,7 +69,7 @@ if seite == "Personendaten":
         st.write(f"Alter der Person: {person.calculate_age()} Jahre")
 
         # --- Nur für Ärzt:innen sichtbar: Bearbeitungsbereich ---
-        if st.session_state["role"] == "arzt":
+        if st.session_state["role"] == "Ärzt:in":
             st.subheader("Personendaten bearbeiten")
 
             new_firstname = st.text_input("Vorname", value=person.firstname)
@@ -143,7 +145,7 @@ elif seite == "EKG-Auswertung":
                 current_comment = selected_test.get("comment", "")
                 st.subheader("Ärztliche Notiz zum Test")
 
-                if st.session_state["role"] == "arzt":
+                if st.session_state["role"] == "Ärzt:in":
                     updated_comment = st.text_area("Notiz eingeben / bearbeiten", value=current_comment)
                     if st.button("Notiz speichern"):
                         import json
@@ -252,7 +254,7 @@ elif seite == "Eigene EKG-Datei hochladen":
 elif seite == "Neue Person anlegen":
     st.header("Neue Person anlegen")
 
-    if st.session_state["role"] != "arzt":
+    if st.session_state["role"] != "Ärzt:in":
         st.info("Dieser Bereich ist nur für Ärzt:innen zugänglich.")
     else:
         st.subheader("Basisdaten eingeben")
@@ -318,7 +320,7 @@ elif seite == "Neue Person anlegen":
 elif seite == "PDF-Bericht erstellen":
     st.header("PDF-Bericht eines EKG-Tests erstellen")
 
-    if st.session_state["role"] != "arzt":
+    if st.session_state["role"] != "Ärzt:in":
         st.info("Nur Ärzt:innen können PDF-Berichte erstellen.")
     elif st.session_state.current_person is None:
         st.info("Bitte zuerst eine Person auf der Seite 'Personendaten' auswählen.")
@@ -348,8 +350,17 @@ elif seite == "PDF-Bericht erstellen":
                         mime="application/pdf"
                     )
 
+
+# --- Logout ---
 elif seite == "Logout":
-    st.session_state.clear()
-    st.success("Du wurdest erfolgreich ausgeloggt.")
-    st.stop()
-    
+    st.header("Logout")
+    # Logout-Funktion
+    if "logged_in" in st.session_state:
+        del st.session_state["logged_in"]
+        del st.session_state["role"]
+        del st.session_state["username"]
+    st.success("Erfolgreich ausgeloggt!")
+    st.write("Bitte lade die Seite neu, um dich erneut einzuloggen.")
+else:
+    st.error("Unbekannte Seite ausgewählt. Bitte wähle eine gültige Option aus der Sidebar.")
+

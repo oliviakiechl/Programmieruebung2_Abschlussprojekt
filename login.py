@@ -1,14 +1,14 @@
 import streamlit as st
 
 USERS = {
-    "dr_schmidt": {"password": "1234", "role": "arzt"},
-    "maria": {"password": "abcd", "role": "patient"}
+    "Dr.Huber": {"password": "1234", "role": "Ärzt:in"},
+    "Jasper": {"password": "abcd", "role": "Patient:in"},
 }
 
 def login():
     st.title("Login für Ärzt:in/ Patient:in")
 
-    role_choice = st.selectbox("Rolle wählen", ["arzt", "patient"])
+    role_choice = st.selectbox("Rolle wählen", ["Ärzt:in", "Patient:in"])
     username = st.text_input("Benutzername")
     password = st.text_input("Passwort", type="password")
 
