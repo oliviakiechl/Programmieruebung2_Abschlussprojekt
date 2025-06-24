@@ -6,7 +6,7 @@ USERS = {
 }
 
 def login():
-    st.title("Login für Arzt / Patient")
+    st.title("Login für Ärzt:in/ Patient:in")
 
     role_choice = st.selectbox("Rolle wählen", ["arzt", "patient"])
     username = st.text_input("Benutzername")
