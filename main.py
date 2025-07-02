@@ -7,56 +7,80 @@ from ekgdata import EKGdata
 from upload import handle_upload
 from herzrate import interactive_hr_plot
 from pdf_export import export_pdf
+from json_handler import add_person_to_json
+import json
+
 
 # Seitenlayout konfigurieren
 st.set_page_config(page_title="EKG Analyse", layout="wide")
-
 
 # --- Login ---
 if "logged_in" not in st.session_state or not st.session_state["logged_in"]:
     login()
     st.stop()
 
+# Session-State initialisieren
+if "current_user_name" not in st.session_state:
+    st.session_state.current_user_name = None
+
+if "current_person" not in st.session_state:
+    st.session_state.current_person = None
+
+
 # Titel
 st.title("EKG APP")
 
-# Sidebar Navigation
-
-# --- Unternavigation für "Neue:r Patient:in"
-seiten = ["Personendaten", "EKG-Auswertung", "Herzfrequenz-Verlauf", "Eigene EKG-Datei hochladen", "PDF-Bericht erstellen","Neue Person anlegen", "Logout"]
-seite = st.sidebar.radio("Navigation", seiten)
-
-# Session-State initialisieren
-if 'current_user_name' not in st.session_state:
-    st.session_state.current_user_name = 'None'
-if 'current_person' not in st.session_state:
-    st.session_state.current_person = None
-
-# Daten laden
 person_data_list = Person.load_person_data()
 person_names = Person.get_person_list(person_data_list)
 
+# Sidebar Navigation
+seiten = [
+    "Personendaten",
+    "EKG-Auswertung",
+    "Herzfrequenz-Verlauf",
+    "Eigene EKG-Datei hochladen",
+    "PDF-Bericht erstellen",
+    "Neue Person anlegen",
+    "Logout"
+]
+seite = st.sidebar.radio("Navigation", seiten)
 
-# --- Seite: Personendaten ---
+# --- Unternavigation für "Neue:r Patient:in"
 if seite == "Personendaten":
     st.header("Versuchsperson auswählen")
 
-    selected_name = st.selectbox(
-        "Versuchsperson",
-        options=person_names,
-        index=person_names.index(st.session_state.current_user_name)
-        if st.session_state.current_user_name in person_names else 0,
-        key="sbVersuchsperson"
-    )
+    if st.session_state["role"] == "Ärzt:in":
+        # Ärzt:in kann Person frei wählen
+        selected_name = st.selectbox(
+            "Versuchsperson",
+            options=person_names,
+            index=person_names.index(st.session_state.current_user_name)
+            if st.session_state.current_user_name in person_names else 0,
+            key="sbVersuchsperson"
+        )
 
-    if selected_name != st.session_state.current_user_name:
-        st.session_state.current_user_name = selected_name
-        person_dict = Person.find_person_data_by_name(selected_name)
+        if selected_name != st.session_state.current_user_name:
+            st.session_state.current_user_name = selected_name
+            person_dict = Person.find_person_data_by_name(selected_name)
+            if person_dict:
+                st.session_state.current_person = Person(person_dict)
+            else:
+                st.session_state.current_person = None
+
+    elif st.session_state["role"] == "Patient:in":
+        # Patient:in sieht nur sich selbst
+        person_dict = next(
+            (p for p in person_data_list if p.get("username") == st.session_state["username"]),
+            None
+        )
         if person_dict:
             st.session_state.current_person = Person(person_dict)
+            st.session_state.current_user_name = f"{person_dict['lastname']}, {person_dict['firstname']}"
         else:
+            st.warning("Deine Daten konnten nicht gefunden werden.")
             st.session_state.current_person = None
 
+    # Anzeige
     if st.session_state.current_person is not None:
         person = st.session_state.current_person
         st.write(f"ID: {person.id}")
@@ -68,19 +92,16 @@ if seite == "Personendaten":
         st.write(f"Geburtsjahr: {person.date_of_birth}")
         st.write(f"Alter der Person: {person.calculate_age()} Jahre")
 
-        # --- Nur für Ärzt:innen sichtbar: Bearbeitungsbereich ---
+        # ✏️ Ärzt:innen dürfen bearbeiten
         if st.session_state["role"] == "Ärzt:in":
             st.subheader("Personendaten bearbeiten")
 
             new_firstname = st.text_input("Vorname", value=person.firstname)
             new_lastname = st.text_input("Nachname", value=person.lastname)
             new_dob = st.text_input("Geburtsjahr", value=str(person.date_of_birth))
-            new_picture = st.file_uploader("Neues Bild hochladen (optional)", type=["jpg", "png", "jpeg"])
+            new_picture = st.file_uploader("Neues Bild hochladen (optional)", type=["jpg", "png", "jpeg"], key="bild_neu")
 
             if st.button("Änderungen speichern"):
-                import json
-                import os
-
                 with open("data/person_db.json", "r", encoding="utf-8") as f:
                     all_persons = json.load(f)
 
@@ -89,24 +110,69 @@ if seite == "Personendaten":
                         p["firstname"] = new_firstname
                         p["lastname"] = new_lastname
                         p["date_of_birth"] = int(new_dob)
-
                         if new_picture is not None:
                             image_path = f"data/pictures/{person.id}.png"
                             with open(image_path, "wb") as img_file:
                                 img_file.write(new_picture.getbuffer())
                             p["picture_path"] = image_path
-
                         break
 
                 with open("data/person_db.json", "w", encoding="utf-8") as f:
                     json.dump(all_persons, f, indent=4, ensure_ascii=False)
 
-                st.success("Daten wurden erfolgreich aktualisiert. Bitte Seite neu laden.")
-        else:
-            st.info("Nur Ärzt:innen können Personendaten bearbeiten.")
-    else:
-        st.warning("Die gewählte Person konnte nicht gefunden werden.")
+                st.success("Daten wurden aktualisiert. Bitte Seite neu laden.")
 
+            # ➕ Neuer EKG-Test
+            st.subheader("Neuen EKG-Test hinzufügen")
+
+            new_ekg_file = st.file_uploader("Neue EKG-Datei (TXT)", type=["txt"], key="new_ekg_upload")
+            new_ekg_date = st.text_input("Datum des neuen Tests (z. B. 2025-06-26)", key="new_ekg_datum")
+
+            if st.button("EKG-Test hinzufügen"):
+                if new_ekg_file and new_ekg_date:
+                    with open("data/person_db.json", "r", encoding="utf-8") as f:
+                        all_persons = json.load(f)
+
+                    new_test_id = max(
+                        (test["id"] for p in all_persons for test in p.get("ekg_tests", [])),
+                        default=0
+                    ) + 1
+
+                    import uuid
+                    filename = f"{uuid.uuid4().hex[:8]}_{new_ekg_file.name}"
+                    ekg_path = f"data/ekg_data/{filename}"
+                    with open(ekg_path, "wb") as f:
+                        f.write(new_ekg_file.getbuffer())
+
+                    for p in all_persons:
+                        if p["id"] == person.id:
+                            p.setdefault("ekg_tests", []).append({
+                                "id": new_test_id,
+                                "date": new_ekg_date,
+                                "result_link": ekg_path,
+                                "comment": ""
+                            })
+                            break
+
+                    with open("data/person_db.json", "w", encoding="utf-8") as f:
+                        json.dump(all_persons, f, indent=4, ensure_ascii=False)
+
+                    st.success("Neuer EKG-Test erfolgreich hinzugefügt.")
+
+                    # Person neu laden, damit neue Tests auch angezeigt werden
+                    updated_dict = Person.find_person_data_by_name(
+                        f"{person.lastname}, {person.firstname}"
+             )
+                    if updated_dict:
+                        st.session_state.current_person = Person(updated_dict)
+
+                else:
+                    st.warning("Bitte Datei und Datum angeben.")
+
+        else:
+            st.info("Nur Ärzt:innen können Personendaten bearbeiten oder Tests hinzufügen.")
+    else:
+        st.warning("Keine gültige Person ausgewählt.")
 
 # --- Seite: EKG-Auswertung ---
 elif seite == "EKG-Auswertung":
@@ -257,33 +323,41 @@ elif seite == "Neue Person anlegen":
     if st.session_state["role"] != "Ärzt:in":
         st.info("Dieser Bereich ist nur für Ärzt:innen zugänglich.")
     else:
+        import json
+        import os
+        import uuid
+        from json_handler import add_login
+
         st.subheader("Basisdaten eingeben")
         firstname = st.text_input("Vorname")
         lastname = st.text_input("Nachname")
         birth_year = st.number_input("Geburtsjahr", min_value=1900, max_value=2100, step=1)
 
-        image_file = st.file_uploader("Bild der Person hochladen", type=["jpg", "jpeg", "png"])
+        image_file = st.file_uploader("Bild der Person hochladen", type=["jpg", "jpeg", "png"], key="bild_upload")
 
-        st.subheader("Optional: EKG-Test hinzufügen")
-        ekg_file = st.file_uploader("EKG-Datei (TXT)", type=["txt"])
-        test_date = st.text_input("Datum des EKG-Tests (z. B. 2025-06-23)")
+        # ⬇ Neuer Abschnitt für optionalen EKG-Test
+        with st.expander("Optional: EKG-Test hinzufügen"):
+            ekg_file = st.file_uploader("EKG-Datei (TXT)", type=["txt"], key="ekg_upload")
+            test_date = st.text_input("Datum des EKG-Tests (z. B. 2025-06-23)", key="ekg_datum")
 
         if st.button("Person speichern"):
-            import json
-            import os
-            import uuid
+            if not firstname or not lastname or not birth_year:
+                st.warning("Bitte alle Pflichtfelder ausfüllen.")
+                st.stop()
 
             with open("data/person_db.json", "r", encoding="utf-8") as f:
                 all_persons = json.load(f)
 
-            new_id = max(p["id"] for p in all_persons) + 1 if all_persons else 1
+            new_id = max((p["id"] for p in all_persons), default=0) + 1
 
+            # Bild speichern
             picture_path = ""
             if image_file:
                 picture_path = f"data/pictures/{new_id}.png"
                 with open(picture_path, "wb") as f:
                     f.write(image_file.getbuffer())
 
+            # EKG speichern
             ekg_tests = []
             if ekg_file and test_date:
                 ekg_id = max(
@@ -298,11 +372,19 @@ elif seite == "Neue Person anlegen":
                     "date": test_date,
                     "result_link": ekg_path
                 })
+            elif ekg_file and not test_date:
+                st.warning("Bitte gib ein Datum für den EKG-Test an.")
+                st.stop()
+
+            # Login-Daten erzeugen
+            username = f"{firstname.lower()}.{lastname.lower()}"
+            password = add_login(username, firstname)
 
             new_person = {
                 "id": new_id,
                 "firstname": firstname,
                 "lastname": lastname,
+                "username": username,
                 "date_of_birth": int(birth_year),
                 "picture_path": picture_path,
                 "ekg_tests": ekg_tests
@@ -313,8 +395,8 @@ elif seite == "Neue Person anlegen":
             with open("data/person_db.json", "w", encoding="utf-8") as f:
                 json.dump(all_persons, f, indent=4, ensure_ascii=False)
 
-            st.success("Person erfolgreich angelegt!")
-
+            st.success("✅ Neue Person erfolgreich angelegt!")
+            st.info(f"**Benutzername:** `{username}`\n**Passwort:** `{password}`")
 
 # --- Seite: PDF-Bericht erstellen (nur für Ärzt:innen) ---
 elif seite == "PDF-Bericht erstellen":

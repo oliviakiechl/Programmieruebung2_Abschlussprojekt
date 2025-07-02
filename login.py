@@ -1,12 +1,14 @@
 import streamlit as st
+import json
 
-USERS = {
-    "Dr.Huber": {"password": "1234", "role": "Ärzt:in"},
-    "Jasper": {"password": "abcd", "role": "Patient:in"},
-}
+def load_user_data():
+    with open("data/logindaten.json", "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def login():
-    st.title("Login für Ärzt:in/ Patient:in")
+    USERS = load_user_data()
+
+    st.title("Login für Ärzt:in / Patient:in")
 
     role_choice = st.selectbox("Rolle wählen", ["Ärzt:in", "Patient:in"])
     username = st.text_input("Benutzername")

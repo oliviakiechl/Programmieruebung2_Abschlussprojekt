@@ -1,0 +1,22 @@
+{
+    "julian.huber": {
+        "password": "julian123",
+        "role": "Patient:in"
+    },
+    "yannic.heyer": {
+        "password": "yannic123",
+        "role": "Patient:in"
+    },
+    "yunus.schmirander": {
+        "password": "yunus123",
+        "role": "Patient:in"
+    },
+    "dr_mayer": {
+        "password": "sophie123",
+        "role": "Ärzt:in"
+    },
+    "marius .valenta": {
+        "password": "marius 123",
+        "role": "Patient:in"
+    }
+}

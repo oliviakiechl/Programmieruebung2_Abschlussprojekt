@@ -4,6 +4,7 @@
         "date_of_birth": 1989,
         "firstname": "Julian",
         "lastname": "Huber",
+        "username": "julian.huber",
         "picture_path": "data/pictures/tb.jpg",
         "ekg_tests": [
             {
@@ -25,6 +26,7 @@
         "date_of_birth": 1967,
         "firstname": "Yannic",
         "lastname": "Heyer",
+        "username": "yannic.heyer",
         "picture_path": "data/pictures/js.jpg",
         "ekg_tests": [
             {
@@ -40,6 +42,7 @@
         "date_of_birth": 1973,
         "firstname": "Yunus",
         "lastname": "Schmirander",
+        "username": "yunus.schmirander",
         "picture_path": "data/pictures/bl.jpg",
         "ekg_tests": [
             {
@@ -47,6 +50,32 @@
                 "date": "11.3.2023",
                 "comment": "keine Auffälligkeiten",
                 "result_link": "data/ekg_data/03_Ruhe.txt"
+            }
+        ]
+    },
+    {
+        "id": 4,
+        "firstname": "Sophie",
+        "lastname": "Mayer",
+        "date_of_birth": 1980,
+        "username": "dr_mayer",
+        "role": "arzt",
+        "picture_path": "data/pictures/dr_mayer.png",
+        "ekg_tests": []
+    },
+    {
+        "id": 5,
+        "firstname": "Marius ",
+        "lastname": "Valenta",
+        "username": "marius .valenta",
+        "date_of_birth": 2005,
+        "picture_path": "data/pictures/5.png",
+        "ekg_tests": [
+            {
+                "id": 5,
+                "date": "2025-06-26",
+                "result_link": "data/ekg_data/d5c412ea_test_ekg_realistisch.txt",
+                "comment": "KI generierter Test "
             }
         ]
     }

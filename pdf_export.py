@@ -3,17 +3,8 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import cm
 from datetime import datetime
-import matplotlib.pyplot as plt
-
-def save_ekg_plot_as_image(ekg_obj, path="temp_plot.png"):
-    fig = ekg_obj.plot_time_series()
-    fig.write_image(path)
-    return path
 
 def export_pdf(person, test, ekg_obj, output_path="ekg_bericht.pdf"):
-    # Plot als Bild speichern
-    image_path = save_ekg_plot_as_image(ekg_obj)
-
     # PDF erzeugen
     c = canvas.Canvas(output_path, pagesize=A4)
     width, height = A4
@@ -56,15 +47,14 @@ def export_pdf(person, test, ekg_obj, output_path="ekg_bericht.pdf"):
             c.drawString(x_margin, y, line)
             y -= 0.7 * cm
 
-    # Plot-Bild einfügen
-    if y > 10 * cm:
-        c.drawImage(image_path, x_margin, 2 * cm, width=16 * cm, preserveAspectRatio=True)
+    # Hinweis statt Plot
+    y -= 1 * cm
+    c.setFont("Helvetica-Oblique", 11)
+    c.drawString(x_margin, y, "Hinweis: Der EKG-Verlauf kann interaktiv in der App analysiert werden.")
+    y -= 0.6 * cm
+    c.drawString(x_margin, y, "Dieser Bericht enthält eine Zusammenfassung der Herzfrequenz und Auffälligkeiten.")
 
     c.showPage()
     c.save()
-
-    # Temporäres Bild löschen
-    if os.path.exists(image_path):
-        os.remove(image_path)
 
     return output_path
