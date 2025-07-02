@@ -80,3 +80,19 @@ cd Programmieruebung2_Abschlussprojekt
 pdm install
 streamlit run main.py
 ```
+
+## 🔑 Beispiel-Logins
+
+Du kannst dich mit folgenden Zugangsdaten einloggen:
+
+### 👩‍⚕️ Ärzt:in
+```text
+Benutzername: dr_mayer
+Passwort: sophie123
+```
+
+### 🧍 Patient:in
+```text
+Benutzername: julian.huber
+Passwort: julian123
+```
